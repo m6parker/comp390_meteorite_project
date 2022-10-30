@@ -2,27 +2,6 @@ import requests
 import sqlite3
 
 
-# 7 tables for different regions, loop through and find which table it belongs
-# if meteor falls in middle of the ocean it doesn't appear on the database
-# use get request to remotely get data from nasa website and put in appropriate table
-# name, mass, lat, long -- columns not 12
-# project 3 including mass
-# 7 tables
-# one function to connect to database, pass database name, simple try except to try to connect to database
-#   return if successful, return none if not.
-# function to create tables call it 7 times.
-# decode json dictionary with json decoder
-# looping after tables made, through json data list, each dict correspons to meteor, only looping thru ONE TIME
-# is geodict not there? does it have reclat, reclong? do nothing if not - first thing have to check.
-# loop thru once: first ask if has geolocation? no... skip to next in list
-# geolocation = yes - extract geolocation from that dictionary. extract = get values and put into tuple/variable.
-# then loop thru bounding boxes (in form of a dictionary)
-# need commit to see the tables filled
-
-# target_url = 'https://data.nasa.gov/resource/gh4g-9sfh.json'
-# geolocation bounding box -- (left,bottom,right,top)
-
-
 def print_red(text: str):
     """ this function changes lines printed to terminal red """
     print(f'\033[91m{text}')
@@ -139,7 +118,10 @@ def create_sql_tables(db_cursor):
         return db_cursor
 
 
-def loop_thru_data(db_cursor):
+def loop_thru_data(db_cursor, json_data_obj):
+    """ this function goes through the data and sorts it into tables based off the reclat and reclong
+    numbers if they have any. It tries to insert them into the table after clearing the table of old stuff"""
+    # geolocation bounding box -- (left,bottom,right,top)
     bound_box_dict = {
         'Africa_MiddleEast_Meteorites': (-17.8, -35.2, 62.2, 37.6),
         'Europe_Meteorites': (-24.1, 36, 32, 71.1),
@@ -149,26 +131,94 @@ def loop_thru_data(db_cursor):
         'North_America_Meteorites': (-168.2, 12.8, -52, 71.5),
         'South_America_Meteorites': (-81.2, -55.8, -34.4, 12.6)
     }
-    for element in db_cursor:
-        print(element)
-    # try:
-    #     db_cursor.execute('''Insert into ''')
-    #     print_green('new row inserted!')
-    # except sqlite3.Error as error:
-    #     print_red(f'{error}: error inserting into table...')
+    for element in json_data_obj:
+        if json_data_obj.reclat is not None:
+            if -35.2 <= float(reclat) <= 37.6 and -17.8 <= float(reclong) <= 62.2:
+                try:
+                    db_cursor.execute('''DELETE FROM Africa_MiddleEast''')
+                    db_cursor.execute('''Insert into Africa_MiddleEast VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif 36 <= float(reclat) <= 71.1 and -24.1 <= float(reclong) <= 32:
+                try:
+                    db_cursor.execute('''DELETE FROM Europe''')
+                    db_cursor.execute('''Insert into Europe VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif 35.8 <= float(reclat) <= 72.7 and 32.2 <= float(reclong) <= 190.4:
+                try:
+                    db_cursor.execute('''DELETE FROM Upper_Asia''')
+                    db_cursor.execute('''Insert into Upper_Asia VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif -9.9 <= float(reclat) <= 38.6 and 58.2 <= float(reclong) <= 154:
+                try:
+                    db_cursor.execute('''DELETE FROM Lower_Asia''')
+                    db_cursor.execute('''Insert into Lower_Asia VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif -43.8 <= float(reclat) <= -11.1 and 112.9 <= float(reclong) <= 154.3:
+                try:
+                    db_cursor.execute('''DELETE FROM Australia''')
+                    db_cursor.execute('''Insert into Australia VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif 12.8 <= float(reclat) <= 71.5 and -168.2 <= float(reclong) <= -52:
+                try:
+                    db_cursor.execute('''DELETE FROM North_America''')
+                    db_cursor.execute('''Insert into North_America VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            elif -55.8 <= float(reclat) <= 12.6 and -81.2 <= float(reclong) <= -34.4:
+                try:
+                    db_cursor.execute('''DELETE FROM South_America''')
+                    db_cursor.execute('''Insert into South_America VALUES(?, ?, ?, ?)''',
+                              (json_data_obj.get('name', None),
+                               json_data_obj.get('mass', None),
+                               json_data_obj.get('reclat', None),
+                               json_data_obj.get('reclong', None)))
+                    print_green('new row inserted!')
+                except sqlite3.Error as error:
+                    print_red(f'{error}: error inserting into table...')
+            else:
+                pass
 
-#
-# # this function takes two parameters: a dictionary object and a target key
-# def convert_obj_to_string(dict_record, key):
-#     # <dict>.get() gets the value associated with a key in a dictionary
-#     # the second parameter for <dict>.get() tells the get function to return 'None' if the key does not exist
-#     if dict_record.get(key, None) is None:
-#         return None
-#     # return a string version of the <dict>[key] object if a key is present
-#     return json.dumps(dict_record[key])
 
 
 def main():
+    """main function calls the get_request function passing the nasa url as the target url to access the data
+    then it calls another function to create database and establish a connection and insert the data onto the database
+    in different tables. the connection is commited and closed. """
     # calls the function checking the status code above then puts in resp obj
     target_url = 'https://data.nasa.gov/resource/gh4g-9sfh.json'
     response_obj = get_request(target_url)
@@ -177,110 +227,9 @@ def main():
     db_connection = connect_to_db('meteorite_db.db')
     db_cursor = create_db_cursor(db_connection)
     db_tables = create_sql_tables(db_cursor)
-    loop_thru_data(db_cursor)
-
-    #
-    # # run a GET request
-    # response = requests.get('https://data.nasa.gov/resource/gh4g-9sfh.json')
-    #
-    # # convert response text to json format (i.e. list of dictionaries)
-    # # (the json() decoder function only works if the text is formatted correctly)
-    # json_data = response.json()
-    #
-    # # connect to database
-    # db_connection = None
-    # try:
-    #     # connect to a sqlite database - create it if it does not exist
-    #     db_connection = sqlite3.connect('meteorite_db.db')
-    #     # create a cursor object - this cursor object will be used for all operations pertaining to the database
-    #     db_cursor = db_connection.cursor()
-    #
-    #     # create a table in the database to store ALL the meteorite data (if it does not already exist)
-    #     # the parentheses following the table name ("meteorite_data") contains a list of column names
-    #     # and the data type of values that will be inserted into those columns
-    #     db_cursor.execute('''CREATE TABLE IF NOT EXISTS meteorite_data(
-    #                             name TEXT,
-    #                             id INTEGER,
-    #                             nametype TEXT,
-    #                             recclass TEXT,
-    #                             mass TEXT,
-    #                             fall TEXT,
-    #                             year TEXT,
-    #                             reclat TEXT,
-    #                             reclong TEXT,
-    #                             geolocation TEXT,
-    #                             states TEXT,
-    #                             counties TEXT);''')
-    #
-    #     # clear the 'meteorite_data' table if it already contains data from last time the program was run
-    #     db_cursor.execute('DELETE FROM meteorite_data')
-    #
-    #     # read all the data from the specified json URL and insert it into the database:
-    #     # loop through each dictionary entry in the JSON list
-    #     for record in json_data:
-    #         # some keys may not exist because there is no value for that record - use <dict>.get()
-    #         # to INSERT 'None' if the key is not found
-    #         db_cursor.execute('''INSERT INTO meteorite_data VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-    #                           (record.get('name', None),
-    #                            int(record.get('id', None)),
-    #                            record.get('nametype', None),
-    #                            record.get('recclass', None),
-    #                            record.get('mass', None),
-    #                            record.get('fall', None),
-    #                            record.get('year', None),
-    #                            record.get('reclat', None),
-    #                            record.get('reclong', None),
-    #                            convert_obj_to_string(record, 'geolocation'),    # convert geolocation <dict> to string
-    #                            record.get(':@computed_region_cbhk_fwbd', None),
-    #                            record.get(':@computed_region_nnqa_25f4', None)))
-    #
-    #     # run a SELECT query on the table that holds all meteorite data
-    #     db_cursor.execute('SELECT * FROM meteorite_data WHERE id <= 1000')
-    #     # get the result of the query as a list of tuples
-    #     q1_result = db_cursor.fetchall()
-    #
-    #     # create a table in the database to store the filtered data (if it does not already exist)
-    #     # this table will hold the resulting rows of our SELECT query
-    #     db_cursor.execute('''CREATE TABLE IF NOT EXISTS filtered_data(
-    #                                            name TEXT,
-    #                                            id INTEGER,
-    #                                            nametype TEXT,
-    #                                            recclass TEXT,
-    #                                            mass TEXT,
-    #                                            fall TEXT,
-    #                                            year TEXT,
-    #                                            reclat TEXT,
-    #                                            reclong TEXT,
-    #                                            geolocation TEXT,
-    #                                            states TEXT,
-    #                                            counties TEXT);''')
-    #
-    #     # clear the 'filtered_data' table if it already contains data from last time the program was run
-    #     db_cursor.execute('DELETE FROM filtered_data')
-    #
-    #     # fill the filtered table
-    #     for tuple_entry in q1_result:
-    #         db_cursor.execute('''INSERT INTO filtered_data VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', tuple_entry)
-    #
-    #     # commit all changes made to the database
-    #     db_connection.commit()
-    #     db_cursor.close()
-    #
-    #     # print(q1_result)
-    #
-    # # catch any database errors
-    # except sqlite3.Error as db_error:
-    #     # print the error description
-    #     print(f'A Database Error has occurred: {db_error}')
-    #
-    # # 'finally' blocks are useful when behavior in the try/except blocks is not predictable
-    # # The 'finally' block will run regardless of what happens in the try/except blocks.
-    # finally:
-    #     # close the database connection whether an error happened or not (if a connection exists)
-    #     if db_connection:
-    #         db_connection.close()
-    #         print('Database connection closed.')
-    #
+    loop_thru_data(db_cursor, json_data_object)
+    db_connection.commit()
+    db_cursor.close()
 
 
 if __name__ == '__main__':
